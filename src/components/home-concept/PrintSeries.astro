@@ -1,6 +1,19 @@
 ---
 import { Image } from 'astro:assets';
 import { printShowcase } from '@/data/print-showcase';
+
+const marks = [
+  { x: 39, y: 5, size: 2.4, ring: true },
+  { x: 52, y: 34, size: 3.8, ring: true },
+  { x: 58, y: 44, size: 1.5, accent: true },
+  { x: 83, y: 7, size: 1.9 },
+  { x: 90, y: 46, size: 2.2, ring: true },
+  { x: 122, y: 5, size: 2.6, ring: true },
+  { x: 145, y: 22, size: 2 },
+  { x: 176, y: 24, size: 1.5, accent: true },
+  { x: 194, y: 12, size: 3.3, ring: true },
+  { x: 219, y: 46, size: 2.2 },
+];
 ---
 
 <section class="series" id="print-series" aria-labelledby="print-series-title">
@@ -15,6 +28,16 @@ import { printShowcase } from '@/data/print-showcase';
       role="list"
       style={`--canvas-width: ${Math.max(...printShowcase.map(({ layout: [x, , width] }) => x + width)) + 2}`}
     >
+      {marks.map((mark) => (
+        <li
+          class:list={['print-mark', { 'print-mark--ring': mark.ring, 'print-mark--accent': mark.accent }]}
+          style={`--x:${mark.x};--y:${mark.y};--mark-size:${mark.size}`}
+          aria-hidden="true"
+          data-print-mark
+        >
+          <span></span>
+        </li>
+      ))}
       {printShowcase.map(({ name, text, href, image, layout: [x, y, width, height, tilt, labelPosition] }) => (
         <li class="piece" style={`--x:${x};--y:${y};--w:${width};--h:${height};--tilt:${tilt}deg`}>
           <a class="piece-link" href={href} data-description={text} draggable="false">
@@ -59,6 +82,7 @@ import { printShowcase } from '@/data/print-showcase';
 
 <script>
   import '@/scripts/print-showcase';
+  import '@/scripts/showcase-marks';
 </script>
 
 <style>
@@ -111,6 +135,36 @@ import { printShowcase } from '@/data/print-showcase';
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  .print-mark {
+    position: absolute;
+    inset-inline-start: calc((var(--x) - var(--mark-size) / 2) * var(--unit));
+    inset-block-start: calc((var(--y) - var(--mark-size) / 2) * var(--unit));
+    width: calc(var(--mark-size) * var(--unit));
+    aspect-ratio: 1;
+    color: #cecec4;
+    pointer-events: none;
+  }
+
+  .print-mark--accent {
+    color: #a8c644;
+  }
+
+  .print-mark span {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(currentColor, currentColor) center / 1px 100% no-repeat,
+      linear-gradient(currentColor, currentColor) center / 100% 1px no-repeat;
+  }
+
+  .print-mark--ring span::after {
+    position: absolute;
+    inset: 23%;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    content: '';
   }
 
   .piece {
