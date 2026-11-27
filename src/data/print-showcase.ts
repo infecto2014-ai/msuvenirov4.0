@@ -9,7 +9,7 @@ import pennant from '@/assets/showcase/pennant.png';
 import stickers from '@/assets/showcase/stickers.png';
 import workwear from '@/assets/showcase/workwear.png';
 
-// Layout values are x, y, width, height and tilt on the shared carousel canvas.
+// Layout values are x, y, width, height, tilt and optional caption placement.
 export const printShowcase = [
   {
     name: 'Печать на футболках',
@@ -24,7 +24,7 @@ export const printShowcase = [
   {
     name: 'Печать на шопперах',
     text: 'Нанесём ваш дизайн на хлопковый шоппер, модель для сублимации или вашу сумку.',
-    href: '/pechat-na-shopperah', image: shopper, layout: [61, 10, 36, 41, 8],
+    href: '/pechat-na-shopperah', image: shopper, layout: [61, 10, 36, 41, 8, 'below'],
   },
   {
     name: 'Печать на закатных значках',
@@ -34,7 +34,7 @@ export const printShowcase = [
   {
     name: 'Печать на худи',
     text: 'Наносим принты на худи. Можно добавить рисунок спереди, на спине или рукаве.',
-    href: '/pechat-na-hudi', image: hoodie, layout: [102, 9, 42, 43, 5],
+    href: '/pechat-na-hudi', image: hoodie, layout: [102, 9, 42, 43, 5, 'below'],
   },
   {
     name: 'Печать на кепках',

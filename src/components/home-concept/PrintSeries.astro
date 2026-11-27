@@ -15,10 +15,10 @@ import { printShowcase } from '@/data/print-showcase';
       role="list"
       style={`--canvas-width: ${Math.max(...printShowcase.map(({ layout: [x, , width] }) => x + width)) + 2}`}
     >
-      {printShowcase.map(({ name, text, href, image, layout: [x, y, width, height, tilt] }) => (
+      {printShowcase.map(({ name, text, href, image, layout: [x, y, width, height, tilt, labelPosition] }) => (
         <li class="piece" style={`--x:${x};--y:${y};--w:${width};--h:${height};--tilt:${tilt}deg`}>
           <a class="piece-link" href={href} data-description={text} draggable="false">
-            <span class="piece-label">{name}</span>
+            <span class:list={['piece-label', { 'piece-label--below': labelPosition === 'below' }]}>{name}</span>
             <Image
               src={image}
               alt=""
@@ -107,7 +107,7 @@ import { printShowcase } from '@/data/print-showcase';
   .showcase-canvas {
     position: relative;
     width: calc(var(--canvas-width) * var(--unit));
-    height: calc(55 * var(--unit));
+    height: calc(53 * var(--unit) + 2rem);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -171,6 +171,18 @@ import { printShowcase } from '@/data/print-showcase';
     border-top: 2px solid var(--merch-lime);
     border-radius: 50%;
     transform: rotate(-8deg);
+  }
+
+  .piece-label--below {
+    inset: calc(100% + .2rem) auto auto 50%;
+    translate: -50% 0;
+    inline-size: max-content;
+    max-inline-size: 100%;
+    text-align: center;
+  }
+
+  .piece-label--below::after {
+    margin-inline: auto;
   }
 
   @media (pointer: coarse) {
