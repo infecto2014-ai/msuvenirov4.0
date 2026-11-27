@@ -1,0 +1,147 @@
+---
+import { Image } from 'astro:assets';
+import heatPress from '@/assets/merch/heat-press.webp';
+import { whyItems } from '@/data/merch-order';
+---
+
+<section class="why" aria-labelledby="merch-why-title">
+  <div class="why-inner">
+    <div class="why-intro">
+      <h2 class="merch-section-title why-title" id="merch-why-title">
+        <span>Почему</span>
+        <span>выбирают нас</span>
+      </h2>
+      <figure class="why-figure">
+        <Image
+          src={heatPress}
+          alt="Открытый термопресс и футболка с принтом"
+          format="webp"
+          quality={76}
+          widths={[360, 560, 800, 1120].filter((width) => width <= heatPress.width)}
+          sizes="(max-width: 760px) 92vw, (max-width: 1680px) 46vw, 760px"
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption>Иллюстрация процесса печати</figcaption>
+      </figure>
+    </div>
+
+    <ul class="why-list" role="list">
+      {whyItems.map(({ title, text }) => (
+        <li class="why-item">
+          <h3>{title}</h3>
+          <p>{text}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .why {
+    color: var(--merch-ink);
+    background: var(--merch-paper);
+  }
+
+  .why-inner {
+    display: grid;
+    gap: clamp(1.65rem, 5cqi, 4.5rem);
+    max-width: 105rem;
+    margin-inline: auto;
+    padding: clamp(2.25rem, 5vw, 5rem) clamp(1.125rem, 3.5vw, 3.9rem);
+    container-type: inline-size;
+  }
+
+  .why .why-title {
+    position: relative;
+    width: fit-content;
+    margin-bottom: clamp(1.35rem, 4.6cqi, 2.8rem);
+    font-size: clamp(2.3rem, 11.5cqi, 4.6rem);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .why-title span {
+    display: block;
+  }
+
+  .why-title::after {
+    position: absolute;
+    inset: calc(100% + .11em) 10% auto 27%;
+    height: .2em;
+    background: var(--merch-lime);
+    clip-path: polygon(0 82%, 24% 51%, 58% 16%, 89% 5%, 100% 15%, 91% 26%, 95% 38%, 73% 39%, 83% 52%, 54% 45%, 25% 71%, 1% 100%);
+    content: '';
+  }
+
+  .why-figure {
+    margin: 0;
+  }
+
+  .why-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.55;
+    object-fit: cover;
+    filter: grayscale(1);
+  }
+
+  .why-figure figcaption {
+    margin-top: .5rem;
+    color: var(--merch-muted);
+    font-size: .75rem;
+  }
+
+  .why-list {
+    display: grid;
+    align-content: start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .why-item {
+    padding-block: clamp(1rem, 2.7cqi, 2.1rem);
+  }
+
+  .why-item:first-child {
+    padding-block-start: 0;
+  }
+
+  .why-item + .why-item {
+    border-top: 1px solid var(--line);
+  }
+
+  .why-item h3 {
+    margin-bottom: .38em;
+    font-family: 'Merch Oswald', var(--font);
+    font-size: clamp(1.9rem, 3.55cqi, 3.6rem);
+    font-weight: 700;
+    line-height: 1.03;
+    letter-spacing: -.04em;
+    transform: skewX(-10deg);
+    transform-origin: left bottom;
+  }
+
+  .why-item p {
+    max-width: 42ch;
+    font-size: clamp(.98rem, 1.55cqi, 1.23rem);
+    line-height: 1.45;
+  }
+
+  @media (min-width: 761px) {
+    .why-inner {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .why .why-title {
+      font-size: clamp(3.1rem, 6.55cqi, 6.25rem);
+    }
+
+    .why-list {
+      padding-top: clamp(0rem, 1cqi, .9rem);
+    }
+  }
+</style>
