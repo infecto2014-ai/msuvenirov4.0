@@ -25,7 +25,7 @@ if (section && rail && dialog) {
     const photo = link.querySelector('img')!;
     enlarged.src = link.href;
     enlarged.alt = photo.alt;
-    caption.textContent = link.nextElementSibling?.textContent ?? '';
+    caption.textContent = photo.alt;
 
     link.focus({ preventScroll: true });
     dialog.showModal();

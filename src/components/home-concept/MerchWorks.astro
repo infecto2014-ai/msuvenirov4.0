@@ -19,7 +19,7 @@ const works = layout.map((item) => {
 <section class="works" aria-labelledby="merch-works-title" data-merch-works>
   <div class="works-inner">
     <header class="works-header">
-      <h2 id="merch-works-title">Наши работы</h2>
+      <h2 class="merch-section-title" id="merch-works-title">Наши работы</h2>
       <a class="works-all" href="/portfolio">Все работы <span aria-hidden="true">↗</span></a>
     </header>
 
@@ -39,7 +39,6 @@ const works = layout.map((item) => {
                 style={`object-position:${position}`}
               />
             </a>
-            <figcaption>{work.title}</figcaption>
           </figure>
         </li>
       ))}
@@ -86,13 +85,6 @@ const works = layout.map((item) => {
 
   .works-header h2 {
     position: relative;
-    font-family: 'Merch Oswald', var(--font);
-    font-size: clamp(2.65rem, 6.8cqi, 7.5rem);
-    font-weight: 700;
-    line-height: .99;
-    letter-spacing: -.05em;
-    transform: skewX(-13deg);
-    transform-origin: left bottom;
   }
 
   .works-header h2::after {
@@ -183,7 +175,6 @@ const works = layout.map((item) => {
     object-fit: cover;
   }
 
-  .works-item figcaption,
   .works-dialog figcaption {
     margin-top: .65rem;
     color: #cacac5;
