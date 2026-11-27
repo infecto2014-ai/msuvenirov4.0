@@ -1,0 +1,279 @@
+---
+import { portfolio } from '@/data/portfolio';
+
+const layout = [
+  { file: 'corporate-polo', dimensions: [745, 800], frame: 'wide', position: '50% 44%' },
+  { file: 'portfolio-2', dimensions: [378, 374], frame: 'portrait', position: '50% 50%' },
+  { file: 'portfolio-7', dimensions: [378, 468], frame: 'portrait', position: '50% 58%' },
+  { file: 'portfolio-5', dimensions: [378, 371], frame: 'square', position: '50% 46%' },
+  { file: 'sport-jersey', dimensions: [800, 791], frame: 'square', position: '50% 54%' },
+  { file: 'branded-caps', dimensions: [745, 800], frame: 'portrait', position: '50% 54%' },
+];
+const works = layout.map((item) => {
+  const work = portfolio.find(({ src }) => src === `/portfolio/${item.file}.webp`);
+  if (!work) throw new Error(`Missing portfolio item: ${item.file}`);
+  return { ...item, work };
+});
+---
+
+<section class="works" aria-labelledby="merch-works-title" data-merch-works>
+  <div class="works-inner">
+    <header class="works-header">
+      <h2 id="merch-works-title">Наши работы</h2>
+      <a class="works-all" href="/portfolio">Все работы <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <ul class="works-rail" aria-label="Фотографии работ мастерской" role="list" data-merch-works-rail>
+      {works.map(({ dimensions: [width, height], frame, position, work }) => (
+        <li class:list={['works-item', `works-item--${frame}`]}>
+          <figure>
+            <a class="work-photo" href={work.src} aria-label={`Увеличить фото: ${work.title}`} draggable="false">
+              <img
+                src={work.src}
+                {width}
+                {height}
+                alt={work.title}
+                loading="lazy"
+                decoding="async"
+                draggable="false"
+                style={`object-position:${position}`}
+              />
+            </a>
+            <figcaption>{work.title}</figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <dialog class="works-dialog" aria-labelledby="merch-work-caption" data-merch-work-dialog>
+    <form method="dialog">
+      <button aria-label="Закрыть фото" autofocus>×</button>
+    </form>
+    <figure>
+      <img alt="" />
+      <figcaption id="merch-work-caption"></figcaption>
+    </figure>
+  </dialog>
+</section>
+
+<script>
+  import '@/scripts/merch-works';
+</script>
+
+<style>
+  .works {
+    --works-black: #0a0a0a;
+    background: var(--works-black);
+    color: var(--merch-paper);
+  }
+
+  .works-inner {
+    --edge: clamp(1.125rem, 3.5cqi, 3.9rem);
+    max-width: 105rem;
+    margin-inline: auto;
+    padding-block: clamp(1.75rem, 4cqi, 4rem) clamp(1.5rem, 4cqi, 4rem);
+    container-type: inline-size;
+  }
+
+  .works-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .5rem 1rem;
+    padding-inline: var(--edge);
+  }
+
+  .works-header h2 {
+    position: relative;
+    font-family: 'Merch Oswald', var(--font);
+    font-size: clamp(2.65rem, 6.8cqi, 7.5rem);
+    font-weight: 700;
+    line-height: .99;
+    letter-spacing: -.05em;
+    transform: skewX(-13deg);
+    transform-origin: left bottom;
+  }
+
+  .works-header h2::after {
+    position: absolute;
+    inset-inline-start: calc(100% + .16em);
+    inset-block-start: .65em;
+    width: clamp(2rem, 15cqi, 12rem);
+    height: .27em;
+    background: var(--merch-lime);
+    clip-path: polygon(0 66%, 25% 41%, 48% 16%, 51% 12%, 40% 63%, 44% 66%, 75% 31%, 95% 26%, 100% 32%, 77% 41%, 41% 83%, 34% 79%, 41% 44%, 5% 83%, 0 78%);
+    content: '';
+  }
+
+  .works-all {
+    display: inline-flex;
+    align-items: center;
+    gap: .35em;
+    min-height: 44px;
+    color: inherit;
+    font-size: clamp(.875rem, 1.45cqi, 1.25rem);
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .works-all:hover {
+    color: var(--merch-lime);
+    text-decoration: underline;
+    text-underline-offset: .22em;
+  }
+
+  .works-rail {
+    display: flex;
+    align-items: start;
+    gap: clamp(.8rem, 5.2cqi, 5.5rem);
+    margin: 0;
+    padding: 1.25rem var(--edge) .7rem;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    list-style: none;
+    user-select: none;
+  }
+
+  .works-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .works-rail figure,
+  .works-dialog figure {
+    margin: 0;
+  }
+
+  .works-item {
+    flex: 0 0 61cqi;
+    min-width: 0;
+  }
+
+  .works-item:nth-child(odd) {
+    padding-block-start: clamp(.9rem, 3.35cqi, 3.5rem);
+  }
+
+  .works-item--wide {
+    flex-basis: 79cqi;
+  }
+
+  .work-photo {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 7 / 10;
+    background: #181818;
+  }
+
+  .works-item--wide .work-photo {
+    aspect-ratio: 1.25;
+  }
+
+  .works-item--square .work-photo {
+    aspect-ratio: 1.12;
+  }
+
+  .work-photo img {
+    position: absolute;
+    inset: -.9rem 0;
+    display: block;
+    width: 100%;
+    height: calc(100% + 1.8rem);
+    object-fit: cover;
+  }
+
+  .works-item figcaption,
+  .works-dialog figcaption {
+    margin-top: .65rem;
+    color: #cacac5;
+    font-size: clamp(.8125rem, 1.05cqi, .975rem);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  .works :is(a, button):focus-visible {
+    outline: 2px solid var(--merch-lime);
+    outline-offset: 5px;
+  }
+
+  @media (min-width: 45rem) {
+    .works-item { flex-basis: 24cqi; }
+    .works-item--wide { flex-basis: 56cqi; }
+    .works-item--square { flex-basis: 38cqi; }
+    .works-item--wide .work-photo { aspect-ratio: 1.83; }
+  }
+
+  @media (max-width: 35rem) {
+    .works-header { align-items: center; }
+    .works-header h2::after {
+      inset-inline-start: 54%;
+      inset-block-start: 101%;
+      width: 43%;
+    }
+  }
+
+  @media (pointer: coarse) {
+    .works-rail {
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: var(--edge);
+    }
+
+    .works-item { scroll-snap-align: start; }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .works-rail, .work-photo { cursor: grab; }
+    .works-rail[data-dragging], .works-rail[data-dragging] .work-photo { cursor: grabbing; }
+  }
+
+  :global(html:has(.works-dialog[open])) {
+    overflow: hidden;
+  }
+
+  .works-dialog {
+    width: max-content;
+    max-width: calc(100vw - 1.5rem);
+    max-height: 96dvh;
+    margin: auto;
+    padding: clamp(.75rem, 2vw, 1.4rem);
+    border: 0;
+    border-radius: .55rem;
+    background: var(--works-black);
+    color: var(--merch-paper);
+  }
+
+  .works-dialog::backdrop {
+    background: rgb(0 0 0 / .84);
+  }
+
+  .works-dialog img {
+    display: block;
+    max-width: min(82vw, 72rem);
+    max-height: 76dvh;
+    object-fit: contain;
+  }
+
+  .works-dialog figcaption {
+    max-width: min(82vw, 72rem);
+    padding-inline-end: .5rem;
+  }
+
+  .works-dialog form {
+    position: absolute;
+    inset: .45rem .45rem auto auto;
+  }
+
+  .works-dialog button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--merch-paper);
+    color: var(--merch-ink);
+    font-size: 1.5rem;
+  }
+</style>
