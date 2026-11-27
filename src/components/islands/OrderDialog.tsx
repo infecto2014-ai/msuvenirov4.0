@@ -27,6 +27,7 @@ const methods: { id: ContactMethod; label: string }[] = [
   { id: 'whatsapp', label: 'WhatsApp' },
   { id: 'vk', label: 'ВКонтакте' },
 ];
+const imageExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.heic', '.tif', '.tiff', '.svg'];
 
 const Cross = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -52,7 +53,7 @@ const Tick = () => (
 
 type Status = { kind: 'idle' } | { kind: 'sending' } | { kind: 'done' } | { kind: 'error'; message: string };
 
-export default function OrderDialog() {
+export default function OrderDialog({ compact = false }: { compact?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [items, setItems] = useState<EstimateItem[]>([]);
   const [name, setName] = useState('');
@@ -60,6 +61,7 @@ export default function OrderDialog() {
   const [method, setMethod] = useState<ContactMethod>('phone');
   const [email, setEmail] = useState('');
   const [comment, setComment] = useState('');
+  const [product, setProduct] = useState('');
   const [files, setFilesState] = useState<File[]>([]);
   // files live in a shared store so a calculator can attach them before the form opens
   const setFiles = (f: File[]) => setOrderFiles(f);
@@ -98,10 +100,11 @@ export default function OrderDialog() {
   useEffect(() => {
     setItems(getEstimate());
     const onChange = (e: Event) => setItems([...(e as CustomEvent<EstimateItem[]>).detail]);
-    const onOpen = (opener?: Element | null) => {
+    const onOpen = (opener?: Element | null, selectedProduct = '') => {
       const from = (opener ?? document.activeElement) as HTMLElement | null;
       const sheet = from?.closest('details.mnav');
       returnTo.current = sheet ? sheet.querySelector<HTMLElement>('summary') : from;
+      setProduct(selectedProduct);
       setItems(getEstimate());
       if (status.kind === 'done') setStatus({ kind: 'idle' });
       startedAt.current = Date.now();
@@ -110,8 +113,8 @@ export default function OrderDialog() {
       const dlg = dialog.current;
       if (dlg && !dlg.open) {
         dlg.showModal();
-        // focus goes to the first field (the browser would pick the close button); closing returns it to the opener
-        dlg.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
+        // Keep the keyboard closed when the compact sheet opens on a phone.
+        if (!compact || matchMedia('(pointer: fine)').matches) dlg.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
       }
       reachGoal('order_open');
     };
@@ -124,7 +127,8 @@ export default function OrderDialog() {
         const what = el.dataset.order?.trim();
         // plain «Заявка» buttons use data-order=""; a bare `data-order` would be rendered by Astro as "true" — not an item
         if (what && what !== 'true') setComment((c) => (c.includes(what) ? c : c ? `${c}\n${what}` : what));
-        onOpen(el);
+        const selectedProduct = el.dataset.orderProduct ?? '';
+        onOpen(selectedProduct ? document.activeElement : el, selectedProduct);
       }
     };
     window.addEventListener(ESTIMATE_EVENT, onChange);
@@ -137,13 +141,19 @@ export default function OrderDialog() {
       window.removeEventListener(ORDER_OPEN_EVENT, onOpenEvent);
       document.removeEventListener('click', onClick);
     };
-  }, [status.kind]);
+  }, [status.kind, compact]);
 
   const close = () => dialog.current?.close();
 
   const addFiles = (list: FileList | null) => {
-    if (!list) return;
-    const next = [...files, ...Array.from(list)].slice(0, MAX_FILES);
+    if (!list?.length) return;
+    const incoming = Array.from(list);
+    if (compact && incoming.some((file) => !imageExtensions.some((extension) => file.name.toLowerCase().endsWith(extension)))) {
+      setFileError('Выберите изображения в формате PNG, JPG, WebP, HEIC, TIFF или SVG.');
+      return;
+    }
+    const allFiles = [...files, ...incoming];
+    const next = compact ? allFiles : allFiles.slice(0, MAX_FILES);
     const err = validateFiles(next);
     setFileError(err ?? '');
     if (!err) {
@@ -159,6 +169,7 @@ export default function OrderDialog() {
 
   const submit = async (e: Event) => {
     e.preventDefault();
+    if (status.kind === 'sending') return;
     setTouched(true);
     if (!nameOk || !phoneOk) {
       reachGoal('form_validation_error');
@@ -168,11 +179,13 @@ export default function OrderDialog() {
     }
     setStatus({ kind: 'sending' });
     reachGoal('form_submit_attempt');
-    const res = await sendOrder({ name, phone, contactMethod: method, email, comment, items, files, website, startedAt: startedAt.current });
+    const description = [product, comment.trim()].filter(Boolean).join('\n');
+    const orderItems = compact ? [] : items;
+    const res = await sendOrder({ name, phone, contactMethod: method, email, comment: description, items: orderItems, files, website, startedAt: startedAt.current });
     if (res.ok) {
       setStatus({ kind: 'done' });
-      reachGoal('form_submit_success', { total, items: items.length, files: files.length });
-      clearEstimate();
+      reachGoal('form_submit_success', { total: estimateTotal(orderItems), items: orderItems.length, files: files.length });
+      if (!compact) clearEstimate();
       setFiles([]);
       setComment('');
     } else {
@@ -185,7 +198,7 @@ export default function OrderDialog() {
     <>
       <dialog
         ref={dialog}
-        class="order"
+        class={compact ? 'order order--compact' : 'order'}
         aria-labelledby="order-title"
         onClick={(e) => {
           if (e.target === dialog.current) close();
@@ -209,15 +222,16 @@ export default function OrderDialog() {
             </div>
           ) : (
             <form onSubmit={submit} noValidate>
-              <h2 id="order-title">{items.length ? 'Ваша смета' : 'Заявка на расчёт'}</h2>
-              {items.length === 0 && <p class="order-empty">В смете пока пусто</p>}
+              <h2 id="order-title">{compact ? 'Обсудим заказ' : items.length ? 'Ваша смета' : 'Заявка на расчёт'}</h2>
+              {!compact && items.length === 0 && <p class="order-empty">В смете пока пусто</p>}
+              {compact && product && <p class="order-product">{product}</p>}
               <p class="order-sub">
-                {items.length
+                {compact ? 'Оставьте номер — позвоним и уточним детали заказа.' : items.length
                   ? 'Проверьте позиции и оставьте контакты — уточним детали и подтвердим цену.'
                   : 'Опишите задачу и приложите макет — рассчитаем стоимость и подскажем лучший вариант.'}
               </p>
 
-              {items.length > 0 && (
+              {!compact && items.length > 0 && (
                 <div class="order-items">
                   {items.map((i) => {
                     const p = i.calc ? findProduct(i.calc.cat, i.calc.product) : undefined;
@@ -280,6 +294,7 @@ export default function OrderDialog() {
                   <input
                     class="order-input"
                     name="name"
+                    required
                     autoComplete="name"
                     maxLength={80}
                     value={name}
@@ -300,6 +315,7 @@ export default function OrderDialog() {
                     class="order-input"
                     name="phone"
                     type="tel"
+                    required
                     autoComplete="tel"
                     inputMode="tel"
                     placeholder="+7 (___) ___-__-__"
@@ -317,7 +333,7 @@ export default function OrderDialog() {
                 </label>
               </div>
 
-              <div class="order-field">
+              {!compact && <div class="order-field">
                 <span class="order-label" id="order-method">Как удобнее связаться?</span>
                 <div class="order-chips" role="radiogroup" aria-labelledby="order-method">
                   {methods.map((m) => (
@@ -326,10 +342,12 @@ export default function OrderDialog() {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div>}
 
               <label class="order-field">
-                <span class="order-label">Комментарий</span>
+                <span class="order-label">
+                  {compact ? <>Описание заказа <span class="order-opt">(по желанию)</span></> : 'Комментарий'}
+                </span>
                 <textarea
                   class="order-input"
                   name="comment"
@@ -340,10 +358,10 @@ export default function OrderDialog() {
                 />
               </label>
 
-              <label class="order-field">
+              {!compact && <label class="order-field">
                 <span class="order-label">E-mail <span class="order-opt">(необязательно)</span></span>
                 <input class="order-input" name="email" type="email" autoComplete="email" maxLength={120} value={email} onInput={(e) => setEmail((e.target as HTMLInputElement).value)} />
-              </label>
+              </label>}
 
               <div
                 class={`order-drop${drag ? ' is-drag' : ''}`}
@@ -362,12 +380,23 @@ export default function OrderDialog() {
                   <span class="order-drop-ic">
                     <Clip />
                   </span>
-                  <input type="file" multiple accept={ACCEPT} class="order-file" onChange={(e) => addFiles((e.target as HTMLInputElement).files)} />
+                  <input
+                    type="file"
+                    multiple
+                    accept={compact ? imageExtensions.join(',') : ACCEPT}
+                    class="order-file"
+                    onChange={(e) => {
+                      addFiles(e.currentTarget.files);
+                      e.currentTarget.value = '';
+                    }}
+                  />
                   <span class="order-drop-text">
                     <span>
-                      <b>Прикрепить макет</b> или перетащите файлы сюда
+                      {compact ? <b>Прикрепить изображения</b> : <><b>Прикрепить макет</b> или перетащите файлы сюда</>}
                     </span>
-                    <small>PNG, JPG, PDF, AI, CDR, PSD, ZIP — до 10 файлов, до 20 МБ каждый</small>
+                    <small>{compact
+                      ? files.length ? `Прикреплено: ${files.length} из ${MAX_FILES}` : `До ${MAX_FILES} изображений · по желанию`
+                      : 'PNG, JPG, PDF, AI, CDR, PSD, ZIP — до 10 файлов, до 20 МБ каждый'}</small>
                   </span>
                 </label>
                 {files.length > 0 && (
@@ -375,7 +404,10 @@ export default function OrderDialog() {
                     {files.map((f, idx) => (
                       <li>
                         <span>{f.name}</span>
-                        <button type="button" aria-label={`Убрать файл ${f.name}`} onClick={() => setFiles(files.filter((_, j) => j !== idx))}>
+                        <button type="button" aria-label={`Убрать файл ${f.name}`} onClick={() => {
+                          setFiles(files.filter((_, j) => j !== idx));
+                          setFileError('');
+                        }}>
                           <Cross />
                         </button>
                       </li>
@@ -404,10 +436,11 @@ export default function OrderDialog() {
               )}
 
               <button type="submit" class="order-btn" disabled={status.kind === 'sending'}>
-                {status.kind === 'sending' ? 'Отправляем…' : items.length ? 'Отправить смету' : 'Отправить заявку'}
+                {status.kind === 'sending' ? 'Отправляем…' : !compact && items.length ? 'Отправить смету' : 'Отправить заявку'}
               </button>
               <p class="order-legal">
-                Нажимая кнопку, вы соглашаетесь с <a href="/privacy-policy">политикой обработки персональных данных</a>. Частным лицам — предоплата 50%, организациям — оплата по счёту.
+                Нажимая кнопку, вы соглашаетесь с <a href="/privacy-policy">политикой обработки персональных данных</a>.
+                {!compact && ' Частным лицам — предоплата 50%, организациям — оплата по счёту.'}
               </p>
             </form>
           )}

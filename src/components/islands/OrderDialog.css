@@ -613,3 +613,58 @@ textarea.order-input {
     transition-duration: 180ms !important;
   }
 }
+
+/* The 4.0 home uses the short contact form. */
+dialog.order--compact {
+  border-radius: 1.5rem;
+  box-shadow: 0 1rem 4rem rgb(0 0 0 / .2);
+}
+
+dialog.order--compact::backdrop {
+  background: rgb(16 16 16 / .48);
+}
+
+.order--compact .order-box h2 {
+  font-size: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
+  letter-spacing: -.045em;
+}
+
+.order--compact .order-product {
+  width: fit-content;
+  margin-top: .65rem;
+  padding: .35rem .7rem;
+  border-radius: 99px;
+  background: var(--sky);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+}
+
+.order--compact .order-btn {
+  background: var(--merch-lime);
+  color: var(--merch-ink);
+}
+
+.order--compact .order-btn:hover:not(:disabled) {
+  border-color: var(--merch-ink);
+  background: var(--merch-lime);
+  box-shadow: none;
+}
+
+.order--compact .order-drop {
+  border-color: #aaa9a1;
+}
+
+.order--compact textarea {
+  min-height: 4.25rem;
+}
+
+.order--compact .order-files {
+  max-height: 9rem;
+  overflow: auto;
+}
+
+@media (max-width: 560px) {
+  dialog.order--compact {
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+}

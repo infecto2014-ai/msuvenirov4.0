@@ -15,6 +15,7 @@ export function stubPages(): StubPage[] {
     ...flatLinks(serviceNav.flatMap((g) => g.links)),
     ...mainNav,
     ...infoNav,
+    { href: '/vympely', label: 'Печать на вымпелах' },
     { href: '/uslugi', label: 'Все услуги' },
     // Keep the existing URL available even though Contacts is no longer a menu item.
     { href: '/kontakty', label: 'Контакты' },

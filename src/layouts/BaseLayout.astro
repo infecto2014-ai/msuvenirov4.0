@@ -64,7 +64,7 @@ const ld = [localBusiness(), website(), ...schema];
     </main>
     {!homeConcept && <Footer />}
     {!homeConcept && <MobileBar />}
-    <OrderDialog client:load />
+    <OrderDialog client:load compact={homeConcept} />
 
     <script>
       import '@/scripts/estimate-badge';
