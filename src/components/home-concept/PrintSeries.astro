@@ -38,23 +38,30 @@ const marks = [
           <span></span>
         </li>
       ))}
-      {printShowcase.map(({ name, text, href, image, layout: [x, y, width, height, tilt, labelPosition] }) => (
-        <li class="piece" style={`--x:${x};--y:${y};--w:${width};--h:${height};--tilt:${tilt}deg`}>
-          <a class="piece-link" href={href} data-description={text} draggable="false">
-            <span class:list={['piece-label', { 'piece-label--below': labelPosition === 'below' }]}>{name}</span>
-            <Image
-              src={image}
-              alt=""
-              format="webp"
-              widths={[400, 640, 900, 1200].filter((width) => width <= image.width)}
-              sizes={`(max-width: 720px) ${Math.round(width * 7.2)}px, ${width}vw`}
-              width={Math.min(image.width, 1200)}
-              loading="lazy"
-              draggable="false"
-            />
-          </a>
-        </li>
-      ))}
+      {printShowcase.map(({ name, text, href, image, layout: [x, y, width, height, tilt], caption: [labelX, labelY] }) => {
+        const imageWidth = Math.min(width, (height - 3) * image.width / image.height);
+        const mobileWidth = Math.ceil(imageWidth * 7.2);
+        const largeWidth = Math.ceil(imageWidth * 16.8);
+
+        return (
+          <li class="piece" style={`--x:${x};--y:${y};--w:${width};--h:${height};--tilt:${tilt}deg;--label-x:${labelX - x};--label-y:${labelY - y}`}>
+            <a class="piece-link" href={href} aria-label={name} data-description={text} draggable="false">
+              <Image
+                src={image}
+                alt=""
+                format="webp"
+                quality={74}
+                widths={[256, 384, 512, 640, 800, 1024, 1200].filter((width) => width <= image.width)}
+                sizes={`(max-width: 720px) ${mobileWidth}px, (max-width: 1680px) ${imageWidth.toFixed(2)}vw, ${largeWidth}px`}
+                width={Math.min(image.width, 1200)}
+                loading="lazy"
+                draggable="false"
+              />
+            </a>
+            <span class="piece-label" aria-hidden="true">{name}</span>
+          </li>
+        );
+      })}
     </ul>
   </div>
 
@@ -145,9 +152,10 @@ const marks = [
   }
 
   .showcase-canvas {
+    --top-space: 5.5;
     position: relative;
     width: calc(var(--canvas-width) * var(--unit));
-    height: calc(53 * var(--unit) + 3rem);
+    height: calc((54 + var(--top-space)) * var(--unit) + 3rem);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -156,7 +164,7 @@ const marks = [
   .print-mark {
     position: absolute;
     inset-inline-start: calc((var(--x) - var(--mark-size) / 2) * var(--unit));
-    inset-block-start: calc((var(--y) - var(--mark-size) / 2) * var(--unit));
+    inset-block-start: calc((var(--y) + var(--top-space) - var(--mark-size) / 2) * var(--unit));
     width: calc(var(--mark-size) * var(--unit));
     aspect-ratio: 1;
     color: #cecec4;
@@ -186,7 +194,7 @@ const marks = [
   .piece {
     position: absolute;
     inset-inline-start: calc(var(--x) * var(--unit));
-    inset-block-start: calc(var(--y) * var(--unit));
+    inset-block-start: calc((var(--y) + var(--top-space)) * var(--unit));
     display: grid;
     place-items: center;
     width: calc(var(--w) * var(--unit));
@@ -223,14 +231,19 @@ const marks = [
   .piece-label {
     position: absolute;
     z-index: 1;
-    inset: -.65rem auto auto .25rem;
-    padding: .18em .4em;
-    border-radius: .6rem;
+    inset: calc(var(--label-y) * var(--unit)) auto auto calc(var(--label-x) * var(--unit));
+    translate: -50% -50%;
+    rotate: calc(var(--tilt) * .55);
+    inline-size: max-content;
+    max-inline-size: calc(25 * var(--unit));
+    padding: .1em .24em;
+    border-radius: .28rem;
     background: var(--merch-paper);
     font-family: 'Caveat', var(--font);
-    font-size: clamp(1.35rem, 2.25cqi, 2.25rem);
+    font-size: clamp(1.125rem, calc(2.15 * var(--unit)), 2rem);
     font-weight: 700;
     line-height: .98;
+    text-align: center;
   }
 
   .piece-label::after {
@@ -239,22 +252,11 @@ const marks = [
     width: 1.7rem;
     height: .35rem;
     margin-top: .15em;
+    margin-inline: auto;
     border-top: 2px solid var(--merch-lime);
     border-radius: 50%;
     transform: rotate(-8deg);
     transform-origin: left;
-  }
-
-  .piece-label--below {
-    inset: calc(100% + .2rem) auto auto 50%;
-    translate: -50% 0;
-    inline-size: max-content;
-    max-inline-size: 100%;
-    text-align: center;
-  }
-
-  .piece-label--below::after {
-    margin-inline: auto;
   }
 
   @media (pointer: coarse) {
@@ -281,7 +283,7 @@ const marks = [
 
     .piece-label {
       opacity: 0;
-      transform: translateY(.35rem) rotate(-3deg);
+      transform: translateY(.35rem);
       transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
     }
 
@@ -290,14 +292,14 @@ const marks = [
       transition: transform 280ms var(--ease-out);
     }
 
-    .showcase:not([data-dragging]) .piece-link:hover .piece-label,
-    .piece-link:focus-visible .piece-label {
+    .showcase:not([data-dragging]) .piece-link:hover + .piece-label,
+    .piece-link:focus-visible + .piece-label {
       opacity: 1;
       transform: none;
     }
 
-    .showcase:not([data-dragging]) .piece-link:hover .piece-label::after,
-    .piece-link:focus-visible .piece-label::after {
+    .showcase:not([data-dragging]) .piece-link:hover + .piece-label::after,
+    .piece-link:focus-visible + .piece-label::after {
       transform: rotate(-8deg);
     }
 

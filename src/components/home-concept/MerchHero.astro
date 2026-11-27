@@ -1,7 +1,21 @@
+---
+import { Image } from 'astro:assets';
+import heroMan from '@/assets/merch/hero-man.png';
+---
+
 <section class="hero" aria-labelledby="merch-title">
   <div class="hero-stage">
     <div class="hero-art">
-      <img src="/img/merch-concept/hero-man.png" width="1086" height="1448" alt="" fetchpriority="high" />
+      <Image
+        src={heroMan}
+        alt=""
+        format="webp"
+        quality={74}
+        widths={[360, 480, 640, 768, 900, 1086]}
+        sizes="(max-width: 719px) 92vw, (max-width: 1680px) 62vw, 1042px"
+        loading="eager"
+        fetchpriority="high"
+      />
     </div>
     <h1 class="merch-title" id="merch-title">
       <span class="merch-shadow" aria-hidden="true">МЕРЧ</span>

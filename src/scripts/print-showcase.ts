@@ -56,7 +56,7 @@ if (rail && dialog) {
     if (!link || typeof dialog.showModal !== 'function') return;
     event.preventDefault();
 
-    const label = link.querySelector('span')!.textContent ?? '';
+    const label = link.getAttribute('aria-label') ?? '';
     const productImage = link.querySelector('img')!;
     title.textContent = label;
     description.textContent = link.dataset.description ?? '';
