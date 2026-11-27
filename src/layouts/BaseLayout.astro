@@ -18,7 +18,7 @@ interface Props {
   noindex?: boolean;
   /** extra JSON-LD objects */
   schema?: object[];
-  /** Two-section home concept with its own navigation; other pages retain their shell. */
+  /** Home concept with its own header and footer. */
   homeConcept?: boolean;
 }
 
@@ -62,7 +62,7 @@ const ld = [localBusiness(), website(), ...schema];
     <main id="main">
       <slot />
     </main>
-    {!homeConcept && <Footer />}
+    {homeConcept ? <slot name="footer" /> : <Footer />}
     {!homeConcept && <MobileBar />}
     <OrderDialog client:load compact={homeConcept} />
 

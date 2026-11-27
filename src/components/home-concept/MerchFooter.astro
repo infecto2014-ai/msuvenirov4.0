@@ -1,0 +1,274 @@
+---
+import Logo from '@/components/Logo.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { site } from '@/data/site';
+
+const socials = [
+  { label: 'Telegram', href: site.social.telegram },
+  { label: 'MAX', href: site.social.max },
+  { label: 'ВКонтакте', href: site.social.vk },
+];
+let letterIndex = 0;
+---
+
+<footer class="merch-footer" id="kontakty">
+  <div class="footer-inner">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <a class="footer-logo" href="/" aria-label={`${site.name} — на главную`}>
+          <Logo inverse size={46} />
+        </a>
+        <p>Печатаем на одежде и сувенирах в Калининграде с {site.founded} года.</p>
+        <ul class="footer-social" role="list" aria-label="Соцсети и мессенджеры мастерской">
+          {socials.map(({ label, href }) => (
+            <li><a href={href} target="_blank" rel="noopener noreferrer">{label} <span aria-hidden="true">↗</span></a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="footer-contacts">
+        <h2>Контакты</h2>
+        <a class="footer-phone" href={site.phoneHref}>{site.phone}</a>
+        <ul role="list">
+          <li>
+            <a href={site.yandexMapsOrg} target="_blank" rel="noopener noreferrer">
+              <Icon name="map-pin" size={18} />
+              <span>{site.address.city}, {site.address.place}<br />{site.address.street}</span>
+              <span class="visually-hidden"> (Яндекс Карты, откроется в новой вкладке)</span>
+            </a>
+          </li>
+          <li><span><Icon name="clock" size={18} /> {site.hours}</span></li>
+          <li><a href={`mailto:${site.email}`}><Icon name="mail" size={18} /> {site.email}</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-legal">
+      <p>© {site.founded}–{new Date().getFullYear()} {site.name}</p>
+      <nav aria-label="Документы">
+        <a href="/privacy-policy">Политика конфиденциальности</a>
+        <a href="/public-offer">Публичная оферта</a>
+      </nav>
+    </div>
+
+    <p class="footer-name" data-footer-name>
+      <span class="visually-hidden">{site.name}</span>
+      {site.name.split(' ').map(word => (
+        <span class="footer-name-line" aria-hidden="true">
+          {Array.from(word).map(letter => (
+            <span class="footer-letter" style={`--letter: ${letterIndex++}`}>{letter}</span>
+          ))}
+        </span>
+      ))}
+    </p>
+  </div>
+</footer>
+
+<script>
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    const footerName = document.querySelector<HTMLElement>('[data-footer-name]');
+    if (footerName) {
+      footerName.dataset.intro = 'pending';
+      const observer = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting) return;
+        footerName.dataset.intro = 'shown';
+        observer.disconnect();
+      }, { threshold: 0.12 });
+      observer.observe(footerName);
+    }
+  }
+</script>
+
+<style>
+  .merch-footer {
+    border-top: 1px solid rgb(255 255 255 / .2);
+    background: var(--merch-ink);
+    color: var(--merch-paper);
+  }
+
+  .footer-inner {
+    max-width: 105rem;
+    margin-inline: auto;
+    padding: clamp(2.35rem, 6vw, 6rem) clamp(1.125rem, 3.5vw, 3.9rem) clamp(1rem, 2.5vw, 2.5rem);
+    container-type: inline-size;
+  }
+
+  .footer-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: clamp(1.6rem, 6cqi, 6rem);
+  }
+
+  .footer-logo {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .footer-brand p {
+    max-width: 27ch;
+    margin: .85rem 0 1.2rem;
+    font-size: clamp(1.15rem, 2cqi, 1.7rem);
+    font-weight: 700;
+    line-height: 1.25;
+    text-wrap: pretty;
+  }
+
+  .footer-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .footer-social a {
+    display: inline-flex;
+    align-items: center;
+    gap: .38rem;
+    min-height: 44px;
+    padding: .45rem .8rem;
+    border: 1px solid rgb(255 255 255 / .35);
+    border-radius: 99px;
+    color: inherit;
+    font-size: .85rem;
+    font-weight: 740;
+    text-decoration: none;
+    transition: border-color var(--t-fast) ease, color var(--t-fast) ease;
+  }
+
+  .footer-social a:hover {
+    border-color: var(--merch-lime);
+    color: var(--merch-lime);
+  }
+
+  .footer-contacts {
+    justify-self: end;
+  }
+
+  .footer-contacts h2 {
+    margin-bottom: .22rem;
+    font-weight: 750;
+    font-size: 1rem;
+  }
+
+  .footer-phone {
+    display: inline-block;
+    color: var(--merch-paper);
+    font-size: clamp(1.35rem, 3.3cqi, 2.65rem);
+    font-weight: 850;
+    line-height: 1.15;
+    white-space: nowrap;
+    text-decoration: none;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .footer-contacts ul {
+    display: grid;
+    gap: .6rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    color: #cecec9;
+    font-size: .93rem;
+    font-weight: 560;
+    line-height: 1.5;
+  }
+
+  .footer-contacts li > :is(a, span) {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .footer-contacts li :global(svg) {
+    flex: none;
+    margin-top: .15rem;
+    color: var(--merch-lime);
+  }
+
+  .footer-contacts a:hover,
+  .footer-legal a:hover {
+    color: var(--merch-lime);
+  }
+
+  .footer-legal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .6rem 1.4rem;
+    margin-top: clamp(1.9rem, 4.2cqi, 3.5rem);
+    padding-top: .85rem;
+    border-top: 1px solid rgb(255 255 255 / .2);
+    color: #cecec9;
+    font-size: .82rem;
+  }
+
+  .footer-legal nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem 1.05rem;
+  }
+
+  .footer-legal a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+  }
+
+  .merch-footer a:focus-visible {
+    outline-color: var(--merch-lime);
+  }
+
+  .footer-name {
+    margin-top: clamp(1.65rem, 4.6cqi, 4.4rem);
+    color: var(--merch-lime);
+    font-size: 14.8cqi;
+    font-weight: 900;
+    line-height: .86;
+    letter-spacing: -.05em;
+    text-transform: uppercase;
+  }
+
+  .footer-name-line {
+    display: block;
+    padding-top: .06em;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .footer-letter {
+    display: inline-block;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .footer-name[data-intro='pending'] .footer-letter {
+      transform: translateY(105%);
+    }
+
+    .footer-name[data-intro='shown'] .footer-letter {
+      transform: translateY(var(--slit, 0em));
+      transition: transform 820ms var(--ease-out);
+      transition-delay: min(calc(var(--letter) * 23ms), 370ms);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+    .footer-name { --slit: .32em; }
+    .footer-name:hover { --slit: 0em; }
+    .footer-name[data-intro='shown']:hover .footer-letter {
+      transition-duration: 430ms;
+      transition-delay: min(calc(var(--letter) * 12ms), 210ms);
+    }
+  }
+
+  @media (max-width: 42rem) {
+    .footer-main { grid-template-columns: minmax(0, 1fr); }
+    .footer-contacts { justify-self: start; }
+    .footer-name { margin-top: 2rem; }
+  }
+</style>
