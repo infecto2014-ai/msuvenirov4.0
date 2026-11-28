@@ -1,0 +1,241 @@
+---
+import { site } from '@/data/site';
+
+const [venue, floor] = site.address.place.split(', ');
+const routeUrl = `https://yandex.ru/maps/?rtext=~${site.address.lat}%2C${site.address.lng}`;
+---
+
+<section class="location" id="kontakty" aria-labelledby="merch-location-title">
+  <div class="location-inner">
+    <h2 id="merch-location-title">Где нас найти</h2>
+
+    <div class="location-layout">
+      <div class="location-details">
+        <p class="location-venue">
+          <span>{venue}</span>
+          <span>{floor}</span>
+        </p>
+        <address class="location-address">
+          {site.address.city}, {site.address.street}<br />
+          {site.hours}
+        </address>
+        <a class="location-route" href={routeUrl} target="_blank" rel="noopener noreferrer">
+          Построить маршрут <span aria-hidden="true">↗</span>
+          <span class="visually-hidden"> (Яндекс Карты, новая вкладка)</span>
+        </a>
+      </div>
+
+      <figure class="location-map">
+        <a href={site.yandexMapsOrg} target="_blank" rel="noopener noreferrer">
+          <img src="/img/merch/equator-map.svg" width="880" height="560" alt="" loading="lazy" decoding="async" />
+          <span class="map-label">
+            Открыть в Яндекс Картах <span aria-hidden="true">↗</span>
+            <span class="visually-hidden"> (новая вкладка)</span>
+          </span>
+        </a>
+        <figcaption class="map-credit">
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap</a>
+        </figcaption>
+      </figure>
+    </div>
+
+    <ul class="location-contacts" role="list" aria-label="Связь с мастерской">
+      <li><a href={site.phoneHref}>{site.phone}</a></li>
+      <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+      <li><a href={site.social.telegram} target="_blank" rel="noopener noreferrer">Telegram <span aria-hidden="true">↗</span></a></li>
+      <li><a href={site.social.max} target="_blank" rel="noopener noreferrer">MAX <span aria-hidden="true">↗</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .location {
+    color: var(--merch-ink);
+    background: #fff;
+  }
+
+  .location-inner {
+    --edge: clamp(1.125rem, 3.5vw, 3.9rem);
+    width: min(97.2rem, calc(100% - 2 * var(--edge)));
+    margin-inline: auto;
+    padding-block: clamp(2.15rem, 4.7vw, 4.8rem) clamp(1.25rem, 2.8vw, 2.65rem);
+    container-type: inline-size;
+  }
+
+  .location h2,
+  .location-venue {
+    font-family: 'Merch Oswald', var(--font);
+    font-weight: 700;
+    letter-spacing: -.043em;
+    line-height: 1;
+  }
+
+  .location h2 {
+    width: fit-content;
+    margin-block-end: clamp(.9rem, 1.9cqi, 1.6rem);
+    font-size: clamp(1.9rem, 3.35cqi, 3.4rem);
+    transform: skewX(-12deg);
+    transform-origin: left bottom;
+  }
+
+  .location-layout {
+    display: grid;
+    gap: clamp(1.4rem, 3.2cqi, 3.15rem);
+    align-items: stretch;
+    padding-block: clamp(1.15rem, 2.05cqi, 2rem);
+    border-block: 1px solid var(--line);
+  }
+
+  .location-venue {
+    margin: 0;
+    font-size: clamp(2.7rem, 13cqi, 5.8rem);
+  }
+
+  .location-venue span {
+    display: block;
+    width: fit-content;
+    transform: skewX(-13deg);
+    transform-origin: left bottom;
+  }
+
+  .location-venue span:last-child {
+    position: relative;
+    padding-bottom: .13em;
+  }
+
+  .location-venue span:last-child::after {
+    position: absolute;
+    inset: auto 0 0 .12em;
+    height: .12em;
+    background: var(--merch-lime);
+    clip-path: polygon(0 75%, 24% 48%, 51% 23%, 74% 10%, 100% 0, 99% 82%, 77% 71%, 50% 75%, 23% 91%, 0 100%);
+    content: '';
+  }
+
+  .location-address {
+    margin-block: clamp(1rem, 2.2cqi, 1.8rem) clamp(.95rem, 1.9cqi, 1.55rem);
+    font-size: clamp(1rem, 1.68cqi, 1.48rem);
+    font-style: normal;
+    font-weight: 550;
+    line-height: 1.5;
+  }
+
+  .location-route {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    min-height: 3rem;
+    padding: .65rem clamp(1rem, 2.6cqi, 2.4rem);
+    border-radius: 100vmax;
+    background: var(--merch-lime);
+    color: var(--merch-ink);
+    font-size: clamp(1rem, 1.8cqi, 1.55rem);
+    font-weight: 750;
+    line-height: 1.2;
+    text-decoration: none;
+  }
+
+  .location-route:hover {
+    background: #b9ed00;
+  }
+
+  .location-map {
+    position: relative;
+    margin: 0;
+  }
+
+  .location-map > a {
+    position: relative;
+    display: block;
+    height: 100%;
+    min-height: 13rem;
+    color: inherit;
+  }
+
+  .location-map img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 11 / 7;
+    object-fit: cover;
+  }
+
+  .map-label {
+    position: absolute;
+    right: .5rem;
+    bottom: .75rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    min-height: 44px;
+    padding: .35rem .65rem;
+    background: #fff;
+    font-size: clamp(.83rem, 1.36cqi, 1.15rem);
+    font-weight: 720;
+  }
+
+  .location-map > a:hover .map-label,
+  .location-contacts a:hover,
+  .map-credit a:hover {
+    text-decoration: underline;
+    text-underline-offset: .2em;
+  }
+
+  .map-credit {
+    position: absolute;
+    bottom: .28rem;
+    left: .4rem;
+    padding: .1rem .3rem;
+    background: #fff;
+    color: var(--merch-muted);
+    font-size: .65rem;
+  }
+
+  .map-credit a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .location-contacts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0 1rem;
+    margin: .65rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .location-contacts a {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    min-height: 44px;
+    color: inherit;
+    font-size: clamp(.96rem, 1.85cqi, 1.55rem);
+    font-weight: 720;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 37rem) {
+    .location-contacts li:nth-child(-n + 2) {
+      flex-basis: 100%;
+    }
+  }
+
+  @media (min-width: 49rem) {
+    .location-layout {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    }
+
+    .location-venue {
+      font-size: clamp(3.35rem, 7.1cqi, 7.3rem);
+    }
+
+    .location-map img {
+      clip-path: polygon(9% 0, 100% 0, 100% 100%, 0 100%);
+    }
+  }
+</style>

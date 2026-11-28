@@ -7,14 +7,19 @@ import MerchWorks from '@/components/home-concept/MerchWorks.astro';
 import MerchReviews from '@/components/home-concept/MerchReviews.astro';
 import MerchWhy from '@/components/home-concept/MerchWhy.astro';
 import MerchOrder from '@/components/home-concept/MerchOrder.astro';
+import MerchFaq from '@/components/home-concept/MerchFaq.astro';
+import MerchLocation from '@/components/home-concept/MerchLocation.astro';
 import MerchFooter from '@/components/home-concept/MerchFooter.astro';
+import { merchFaq } from '@/data/merch-faq';
+import { faqPage } from '@/lib/schema';
 import '@/styles/merch-home.css';
 ---
 
 <BaseLayout
   title="Печать на одежде и сувенирах в Калининграде — Мастерская сувениров"
-  description="Ваш дизайн на одежде, кружках и шопперах. Мастерская печати в Калининграде, ТЦ «Экватор». Обсудим идею и поможем с заказом."
+  description="Печать на футболках, кружках и шопперах в Калининграде. В ТЦ «Экватор» печатаем подарки по одному и мерч для компаний. Узнайте, как подготовить макет и забрать заказ."
   path="/"
+  schema={[faqPage(merchFaq)]}
   homeConcept
 >
   <ConceptHeader slot="header" />
@@ -24,5 +29,7 @@ import '@/styles/merch-home.css';
   <MerchReviews />
   <MerchWhy />
   <MerchOrder />
+  <MerchFaq />
+  <MerchLocation />
   <MerchFooter slot="footer" />
 </BaseLayout>

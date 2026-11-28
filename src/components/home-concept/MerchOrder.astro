@@ -34,27 +34,31 @@ import { orderSteps } from '@/data/merch-order';
 
 <style>
   .order-guide {
+    --order-edge: clamp(1.125rem, 3.5vw, 3.9rem);
     background: var(--merch-ink);
     color: var(--merch-paper);
   }
 
   .order-inner {
     display: grid;
-    gap: clamp(1.65rem, 4.3vw, 4.5rem);
-    max-width: 105rem;
+    gap: clamp(1.65rem, 4.3vw, 4rem);
+    width: min(97.2rem, calc(100% - 2 * var(--order-edge)));
     margin-inline: auto;
-    padding: clamp(2.25rem, 4.7vw, 5rem) clamp(1.125rem, 3.5vw, 3.9rem);
+    padding-block: clamp(2.25rem, 4.7vw, 5rem);
     container-type: inline-size;
   }
 
   .order-guide .order-title {
     width: fit-content;
-    font-size: clamp(3.65rem, 8.1cqi, 8.3rem);
+    font-size: clamp(3.65rem, 7.7cqi, 7.5rem);
     text-transform: uppercase;
+    transform: none;
   }
 
   .order-title span {
     display: block;
+    transform: skewX(-13deg);
+    transform-origin: left bottom;
   }
 
   .order-actions {
@@ -113,35 +117,29 @@ import { orderSteps } from '@/data/merch-order';
 
   .order-sheet {
     --hole-radius: clamp(.31rem, .63cqi, .54rem);
+    --hole-step: calc(3.45 * var(--hole-radius));
+    --hole-edge: calc(var(--hole-radius) + 1px);
     position: relative;
+    isolation: isolate;
     margin: 0;
-    padding: clamp(.7rem, 1.15cqi, 1rem) clamp(1rem, 3.2cqi, 2.75rem);
+    padding: clamp(.7rem, 1.15cqi, 1rem) clamp(1rem, 2.9cqi, 2.55rem);
     list-style: none;
-    background: var(--merch-paper);
     color: var(--merch-ink);
   }
 
-  .order-sheet::before,
-  .order-sheet::after {
+  .order-sheet::before {
     position: absolute;
-    inset-block: 0;
-    width: calc(var(--hole-radius) + 1px);
-    background: radial-gradient(
-      circle at 0 50%,
-      var(--merch-ink) calc(var(--hole-radius) - 1px),
-      transparent var(--hole-radius)
-    ) left top / 100% calc(3.45 * var(--hole-radius)) repeat-y;
+    z-index: -1;
+    inset: 0;
+    background: var(--merch-paper);
+    mask:
+      linear-gradient(#000 0 0) center / calc(100% - 2 * var(--hole-radius)) 100% no-repeat,
+      radial-gradient(circle at left, transparent calc(var(--hole-radius) - .5px), #000 var(--hole-radius))
+        left top / var(--hole-edge) var(--hole-step) repeat-y,
+      radial-gradient(circle at right, transparent calc(var(--hole-radius) - .5px), #000 var(--hole-radius))
+        right top / var(--hole-edge) var(--hole-step) repeat-y;
     pointer-events: none;
     content: '';
-  }
-
-  .order-sheet::before {
-    inset-inline-start: 0;
-  }
-
-  .order-sheet::after {
-    inset-inline-end: 0;
-    transform: scaleX(-1);
   }
 
   .order-step {
@@ -169,13 +167,12 @@ import { orderSteps } from '@/data/merch-order';
 
   .step-copy h3 {
     margin: 0;
-    padding-inline-start: .08em;
     font-family: 'Merch Oswald', var(--font);
     font-size: clamp(1.43rem, 3.1cqi, 2.8rem);
     font-weight: 700;
     line-height: 1.06;
     transform: skewX(-11deg);
-    transform-origin: left bottom;
+    transform-origin: left 80%;
   }
 
   .step-copy p {
@@ -187,8 +184,12 @@ import { orderSteps } from '@/data/merch-order';
 
   @media (min-width: 49rem) {
     .order-inner {
-      grid-template-columns: minmax(0, .72fr) minmax(0, 1.28fr);
-      align-items: center;
+      grid-template-columns: minmax(0, .76fr) minmax(0, 1.24fr);
+      align-items: start;
+    }
+
+    .order-intro {
+      padding-block-start: clamp(1.25rem, 3.25cqi, 3rem);
     }
   }
 </style>
