@@ -1,35 +1,70 @@
 const reviews = document.querySelector<HTMLElement>('[data-merch-reviews]');
-const dialog = reviews?.querySelector<HTMLDialogElement>('[data-merch-review-dialog]');
 
-if (reviews && dialog && typeof dialog.showModal === 'function') {
-  const dialogText = dialog.querySelector('[data-dialog-review-text]')!;
+if (reviews) {
+  const tabs = [...reviews.querySelectorAll<HTMLButtonElement>('.review-tab')];
+  const panels = [...reviews.querySelectorAll<HTMLElement>('.review-panel')];
+  const stories = [...reviews.querySelectorAll<HTMLElement>('.review-story')];
+  const marker = reviews.querySelector<HTMLElement>('[data-review-marker]')!;
+  const dialog = reviews.querySelector<HTMLDialogElement>('[data-merch-review-dialog]')!;
   const dialogAuthor = dialog.querySelector('#merch-review-author')!;
-  const dialogMeta = dialog.querySelector('[data-dialog-review-meta]')!;
-  const cards = [...reviews.querySelectorAll<HTMLElement>('[data-review-card]')];
-  const previews = cards.map(card => ({
-    text: card.querySelector<HTMLElement>('[data-review-text]')!,
-    more: card.querySelector<HTMLElement>('[data-review-more]')!,
-  }));
+  const dialogText = dialog.querySelector('[data-dialog-review-text]')!;
+  let selected = 0;
 
-  const updatePreviews = () => {
-    for (const { text, more } of previews) {
-      more.hidden = text.scrollHeight <= text.parentElement!.clientHeight + 1;
-    }
+  const moveMarker = () => {
+    const tab = tabs[selected];
+    const inset = 12;
+    const height = Math.max(0, tab.offsetHeight - 2 * inset);
+    marker.style.transform = `translateY(${tab.offsetTop + inset}px) scaleY(${height / 100})`;
   };
-  new ResizeObserver(updatePreviews).observe(reviews);
-  document.fonts.ready.then(updatePreviews);
 
-  reviews.addEventListener('click', event => {
-    const link = (event.target as Element).closest<HTMLElement>('[data-review-more]');
-    if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-    event.preventDefault();
-    const card = link.closest('[data-review-card]')!;
-    dialogText.textContent = card.querySelector('[data-review-text]')!.textContent;
-    dialogAuthor.textContent = card.querySelector('[data-review-name]')!.textContent;
-    dialogMeta.textContent = card.querySelector('[data-review-meta]')!.textContent;
-    link.focus({ preventScroll: true });
-    dialog.showModal();
+  const select = (index: number, animate: boolean) => {
+    if (index === selected) return;
+    reviews.toggleAttribute('data-review-motion', animate);
+    tabs[selected].setAttribute('aria-selected', 'false');
+    tabs[selected].tabIndex = -1;
+    panels[selected].dataset.selected = 'false';
+    panels[selected].setAttribute('aria-hidden', 'true');
+    panels[selected].inert = true;
+
+    selected = index;
+    tabs[selected].setAttribute('aria-selected', 'true');
+    tabs[selected].tabIndex = 0;
+    panels[selected].inert = false;
+    panels[selected].removeAttribute('aria-hidden');
+    panels[selected].dataset.selected = 'true';
+    moveMarker();
+  };
+
+  const observer = new ResizeObserver(moveMarker);
+  tabs.forEach((tab, index) => {
+    observer.observe(tab);
+    tab.addEventListener('click', event => select(index, event.detail > 0));
+    tab.addEventListener('keydown', event => {
+      let next: number;
+      switch (event.key) {
+        case 'ArrowDown': next = (index + 1) % tabs.length; break;
+        case 'ArrowUp': next = (index + tabs.length - 1) % tabs.length; break;
+        case 'Home': next = 0; break;
+        case 'End': next = tabs.length - 1; break;
+        default: return;
+      }
+      event.preventDefault();
+      select(next, false);
+      tabs[next].focus();
+    });
   });
+
+  reviews.dataset.reviewTabsReady = '';
+  moveMarker();
+
+  for (const button of reviews.querySelectorAll<HTMLButtonElement>('[data-review-more]')) {
+    button.addEventListener('click', () => {
+      const story = stories[Number(button.dataset.reviewMore)];
+      dialogAuthor.textContent = story.querySelector('.review-meta > span')!.textContent;
+      dialogText.textContent = story.querySelector('.review-story-text p')!.textContent;
+      dialog.showModal();
+    });
+  }
 
   dialog.addEventListener('click', event => {
     if (event.target === dialog) dialog.close();
